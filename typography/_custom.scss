@@ -1,0 +1,51 @@
+@mixin modular-font($s, $l, $f){
+	font:#{modular-scale($s)}/#{modular-scale($l)} $f;
+}
+
+@function modular-scale-rem($scale){
+	$rem: #{strip-units(modular-scale($scale))}rem;
+	@return $rem;
+}
+// Mirroring Google Docs Styles Options
+
+// Title
+// Sub Title
+// Heading1
+// Heading2
+// Heading3
+// Text
+
+@mixin small-copy(){
+	@include modular-font(-1, 0, $muli);
+	font-weight:400;
+	font-style:italic;
+}
+
+@mixin main-copy(){
+	@include modular-font(0, 0, $muli);
+	letter-spacing:.05em;
+}
+
+@mixin large-copy(){
+	@include modular-font(1, 0, $muli);
+}
+
+/////
+
+@mixin small-title(){
+	@include modular-font(1, 0, $font);
+	text-align: center;
+}
+
+@mixin main-title() {
+	@include modular-font(2, 0, $font);
+	text-align: center;
+	//text-shadow: 1px 1px white, 2px 2px $color-b;
+}
+
+@mixin large-title() {
+	$em:0.02em;
+	@include modular-font(4, 0, $font);
+	text-align: center;
+	text-shadow: $em $em white, $em*2 $em*2 $color-b;
+}

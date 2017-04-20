@@ -1,0 +1,105 @@
+//////////////////////////////////////////////////////////////////
+// MAJOR TO DO
+// abstract value function and expose as API
+// so vertical rhythm is available throught design
+//////////////////////////////////////////////////////////////////
+
+// // Scale factor constants.
+// // Don't change them ever!
+// $MINOR_SECOND: 1.067;
+// $MAJOR_SECOND: 1.125;
+// $MINOR_THIRD: 1.2;
+// $MAJOR_THIRD: 1.25;
+// $PERFECT_FOURTH: 1.333;
+// $AUGMENTED_FOURTH: 1.414;
+// $PERFECT_FIFTH: 1.5;
+// $MINOR_SIXTH: 1.6;
+// $GOLDEN_SECTION: 1.618;
+// $MAJOR_SIXTH: 1.667;
+// $MINOR_SEVENTH: 1.778;
+// $MAJOR_SEVENTH: 1.875;
+// $OCTAVE: 2;
+// $MAJOR_TENTH: 2.5;
+// $MAJOR_ELEVENTH: 2.667;
+// $MAJOR_TWELFTH: 3;
+// $DOUBLE_OCTAVE: 4;
+//
+// // Default font size.
+// // Don't change it ever!
+// $SGL_DEFAULT_FONT_SIZE: 16;
+
+/// @type boolean
+$sgl-debug-mode: false;
+
+/// Base font size.
+///
+/// @type number
+$sgl-base-font-size:16;
+
+/// Base line height.
+///
+/// @type number
+$sgl-base-line-height: 1.2;
+
+/// Base unit (`px`, `em`, `rem`, `pxrem`).
+///
+/// @type string
+$sgl-base-unit: "pxrem" !default;
+
+/// Scale factor.
+///
+/// @type number
+$sgl-scale-factor: $MAJOR_SEVENTH;
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//  VERTICAL RHYTM STYLING PRESET
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+html {
+  @include sgl-html();
+}
+
+body {
+	@include sgl-body("pxrem");
+}
+
+.grid-1 {
+
+  h1 {
+  	@include sgl-heading(3, "pxrem");
+  }
+
+  h2 {
+  	@include sgl-heading(2, "pxrem");
+  }
+
+  h3 {
+  	@include sgl-heading(1, "pxrem");
+  }
+
+  h4 {
+  	@include sgl-heading(0);
+  }
+
+  p,
+  ul,
+  ol,
+  pre,
+  table,
+  blockquote {
+  	@include sgl-margins();
+  }
+}
+
+
+
+// OR
+// Mirroring Google Docs Styles Options
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//  RESPONSIVE MEDIA QUERRIES
+//////////////////////////////////////////////////////////////////////////////////////////

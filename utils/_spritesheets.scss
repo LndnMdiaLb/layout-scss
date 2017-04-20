@@ -1,0 +1,855 @@
+
+@import "utils";
+
+// should be in utils
+
+/*
+
+setup >>> $sprite-sheet:(<path>, <width>, <height>, <cols>, <rows>);
+examlple : $sprite-sheet:('assets/spritesheet.jpg', 1525, 1800, 5, 5);
+
+*/
+
+/////////////// SpriteSheet helpers ////////////////////
+
+
+@function sheet-url($sheetdata) {
+	@return url(nth($sheetdata, 1));
+}
+
+@function frame-width($sheetdata) {
+	@return nth($sheetdata, 2) / nth($sheetdata, 4) * 1px;
+}
+
+@function frame-height($sheetdata) {
+	@return nth($sheetdata, 3) / nth($sheetdata, 5) * 1px;
+}
+
+@function cols($sheetdata) {
+	@return nth($sheetdata, 4);
+}
+
+@function rows($sheetdata) {
+	@return nth($sheetdata, 5);
+}
+
+
+
+/////////////// Sprite sheet builder mixins ////////////////////
+
+@mixin spritesheet-set-to-framesize ($sheetdata){
+	width: frame-width($sheetdata);
+	height: frame-height($sheetdata);
+}
+
+
+/*
+
+$offscreen var is used to control if sprite sheet frame 1 is visible after basic setup ( example if animation-delay is applied on spritesheet )
+
+*/
+
+
+@mixin spritesheet-set-background ($sheetdata, $offscreen:true){
+	background:{
+		image: sheet-url($sheetdata) !important;
+		size: cols($sheetdata) * 100% rows($sheetdata) * 100%;
+		// %%FIX%% understand why background-size is set to ex 300% 400% and background postition 100% 100% still refers to bottom right hand corner
+		position: if($offscreen, 200% 200%, 0px 0px);
+		repeat: no-repeat;
+	}
+}
+
+@mixin spritesheet-set-animation ($name, $duration, $delay:0s){
+	//-webkit-animation: $name $duration steps(1) $delay;
+	-webkit-animation-name: $name;
+	-webkit-animation-duration: $duration;
+	-webkit-animation-delay: $delay;
+	-webkit-animation-timing-function: steps(1);
+}
+
+
+
+
+// create timeline
+// can replace pause-value
+/*
+
+//////////////////////
+// set value for range
+//////////////////////
+
+@include keyframes-range( 2s, 10s){
+	opacify: 0 ;
+}
+--|========|
+
+@include keyframes-range( 2s, 10s, 20s){
+	opacify: 0 ;
+}
+--|========|----------|
+
+//////////////////////
+// pass start values
+//////////////////////
+
+@include keyframes-range( 2s, 10s, $m1:(opacity:1)){
+	opacify: 0 ;
+}
+  m1       content
+--|========|
+
+@include keyframes-range( 2s, 10s, 20s, (opacity:1)){
+	opacify: 0 ;
+}
+  m1       content
+--|========|----------|
+
+//////////////////////
+// pass end values
+//////////////////////
+
+@include keyframes-range( 2s, 10s, 20s, $m2:(opacity:1)){
+	opacify: 0 ;
+}
+  content  m2
+--|========|
+
+//////////////////////
+// pass start end values
+//////////////////////
+
+@include keyframes-range( 2s, 10s, 20s, ( opacity:0 ) , ( opacity:1 ) )
+  m1       m2
+--|========|----------|
+
+*/
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  ////
+////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////         //
+//  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //// 
+////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////
+//////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//        ///        ///        ///      ///////////////////////////////////////////////////////////////////////////////////////////
+//  ////  ///  ///   ///  /////////  ////  /////////////////////////////////////////////////////////////////////////////////////////
+//        ///      /////  /////////  ////  /////////////////////////////////////////////////////////////////////////////////////////
+//  ////  ///  ///   ///  /////////  ////  /////////////////////////////////////////////////////////////////////////////////////////
+//  ////  ///        ///        ///      ///////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+@mixin spritesheet-set-keyframes ($spritesheet-cols, $spritesheet-rows, $omit-frames:null){
+
+	$lastframe: if( $omit-frames, $omit-frames + 1, 1 );
+	// number or frames
+	// 1 frame will be removed as for loop starts at 0, if $omit-frames is set the number will be included
+	// the result of this is that a spritesheet with white space can be used
+	$frames:($spritesheet-rows * $spritesheet-cols) - $lastframe;
+
+	// percentage width of frame ( -1 is used to compensate for background-position % usage )
+	// ex. background-position: 0% 0% ; is the top left hand corner
+	// background-position: 100% 100% ; is the bottom right hand corner
+	// in a spritesheet environment this creates unexpected results
+
+	$col-position-fix: if(($spritesheet-cols - 1) != 0, $spritesheet-cols - 1, 1 );
+	$row-position-fix: if(($spritesheet-rows - 1) != 0, $spritesheet-rows - 1, 1 );
+
+	@for $i from 0 through $frames {
+
+		// current col
+		$col: $i % $spritesheet-cols;
+		// current row
+		$row: floor( $i / $spritesheet-cols);
+
+		// position of frame in percent on x-axis (percent)
+		$x: percentage( $col / $col-position-fix );
+		// position of frame in percent on x-axis (percent)
+		$y: percentage( $row / $row-position-fix );
+
+		// define number of decimal places. ex 10 == 1  100 == 2
+		$accuracy: 100;
+		// find step percentage
+		$at: percentage( round($accuracy * $i / $frames) / $accuracy );
+
+		#{$at}{
+			background-position: $x $y ;
+			@content;
+		}
+	}
+}
+
+
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+
+
+// @mixin spritesheet-set-keyframes ($spritesheet, $start, $duration, $total:null, $reverse:false, $frame-range:0){
+@mixin spritesheet-set-keyframes ($spritesheet-cols, $spritesheet-rows, $start, $duration, $total:null, $omit-frames:null){
+	
+	// $omit-frames is number of frames to ignore
+	// change $omit-frames $frame-range and make it accept + or - to define spritesheet-range
+
+	// 1 frame will be removed as @for loop starts at 0, 
+	// if $omit-frames is set the number will be included
+	// the result of this is that a spritesheet with white space can be used	
+	$lastframe: if( $omit-frames, $omit-frames + 1, 1 );
+	$frames:($spritesheet-rows * $spritesheet-cols) - $lastframe;
+
+	// percentage width of frame ( -1 is used to compensate for background-position % usage )
+	// ex. background-position: 0% 0% ; is the top left hand corner
+	// background-position: 100% 100% ; is the bottom right hand corner
+	// in a spritesheet environment this creates unexpected results
+
+	$col-position-fix: if(($spritesheet-cols - 1) != 0, $spritesheet-cols - 1, 1 );
+	$row-position-fix: if(($spritesheet-rows - 1) != 0, $spritesheet-rows - 1, 1 );
+
+	@for $i from 0 through $frames {
+
+		// current col
+		$col: $i % $spritesheet-cols;
+		// current row
+		$row: floor( $i / $spritesheet-cols);
+
+		// position of frame in percent on x-axis (percent)
+		$x: percentage( $col / $col-position-fix );
+		// position of frame in percent on x-axis (percent)
+		$y: percentage( $row / $row-position-fix );
+
+		// define number of decimal places. ex 10 == 1  100 == 2
+		$accuracy: 100;
+		// find step percentage
+		$at: percentage( round($accuracy * $i / $frames) / $accuracy );
+
+		#{$at}{
+			background-position: $x $y ;
+			@content;
+		}
+	}
+}
+
+
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+
+
+
+
+
+@mixin spritesheet-set-keyframes-time( $spritesheet-cols, $spritesheet-rows, $start, $duration, $total, $reverse:false ){
+
+	//
+	$_total: if( $total, $total, $duration );
+
+	// fractional values to start at
+	$begin : $start / $_total ;
+	
+	// fractional values of duration
+	$_duration: $duration / $total ;
+
+	// number or frames
+	// -1 because 0 is a value in th @for loop
+	$frames:($spritesheet-rows * $spritesheet-cols) - 1;
+
+	// avoid showing final frame twice in reverse frames
+	$rframes: $frames - 1 ;
+
+	// background-position: % does not follow normal dimensions css logic
+	// ex. background-position: 0% 0% ; displays 1st frame
+	// background-position: 100% 100% ; displays last frame ( unexpected - not mathematicaly correct )
+	// to compensate for this  -1 is used
+
+	$col-position-fix: if(($spritesheet-cols - 1) != 0, $spritesheet-cols - 1, 1 );
+	$row-position-fix: if(($spritesheet-rows - 1) != 0, $spritesheet-rows - 1, 1 );
+
+
+	$x:0;
+	$y:0;
+
+	// define number of decimal places. ex 10 == 1  100 == 2
+	$accuracy:100;
+
+	@if $reverse == false {
+		
+		@for $i from 0 through $frames {
+
+			//current col
+			$col: $i % $spritesheet-cols;
+			//current row
+			$row: floor( $i / $spritesheet-cols);
+
+			//position of frame in percent on x-axis (percent)
+			$x:percentage( $col / $col-position-fix );
+			//position of frame in percent on x-axis (percent)
+			$y:percentage( $row / $row-position-fix );
+
+
+			
+			$step: $i * $_duration / $frames ;
+
+			// find step percentage
+			//$at:  round($accuracy * $i * ($animation-pauseat) / $frames) / $accuracy;
+
+			$at: percentage(round($accuracy * ( $begin + $step )) / $accuracy );
+
+			#{$at}{
+				background-position: $x $y ;
+				@content;
+			}
+		}
+	}
+
+	@if $reverse {
+
+		@for $i from $frames through 0 {
+
+			//current col
+			$col: $i % $spritesheet-cols;
+			//current row
+			$row: floor( $i / $spritesheet-cols);
+
+			//position of frame in percent on x-axis (percent)
+			$x:percentage( $col / $col-position-fix );
+			//position of frame in percent on x-axis (percent)
+			$y:percentage( $row / $row-position-fix );
+
+
+			$step: ( $frames - $i ) * $_duration / $frames ;
+
+			// find step percentage
+			//$at:  round($accuracy * $i * ($animation-pauseat) / $frames) / $accuracy;
+
+			$at: percentage(round($accuracy * ( $begin + $step )) / $accuracy );
+
+			#{$at}{
+				background-position: $x $y ;
+				@content;
+			}
+		}
+
+	}
+
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+
+
+
+
+@mixin spritesheet-set-keyframes-complex ( $spritesheet-cols, $spritesheet-rows, $start, $duration, $total, $reverse:false ){
+
+	$_start: 100 * $start / $total;
+	$_duration: 100 * $duration / $total ;
+
+	// number or frames
+	// -1 because 0 is a value in th @for loop
+	$frames:($spritesheet-rows * $spritesheet-cols) - 1;
+
+	$total-frames: $frames;
+	// avoid showing final frame twice in reverse frames
+	$rframes: $frames - 1 ;
+
+	$total-frames: if( $reverse, $rframes + $frames + 1, $frames );
+
+	// background-position: % does not follow normal dimensions css logic
+	// ex. background-position: 0% 0% ; displays 1st frame
+	// background-position: 100% 100% ; displays last frame ( unexpected - not mathematicaly correct )
+	// to compensate for this  -1 is used
+
+	$col-position-fix: if(($spritesheet-cols - 1) != 0, $spritesheet-cols - 1, 1 );
+	$row-position-fix: if(($spritesheet-rows - 1) != 0, $spritesheet-rows - 1, 1 );
+
+
+	$col-ratio: 100 / $col-position-fix;
+	//percentage height of frame
+	$row-ratio: 100 / $row-position-fix;
+
+	$x:0;
+	$y:0;
+
+	// define number of decimal places. ex 10 == 1  100 == 2
+	$accuracy:10;
+
+	@for $i from 0 through $frames {
+
+		//current col
+		$col: $i % $spritesheet-cols;
+		//current row
+		$row: floor( $i / $spritesheet-cols);
+
+		//position of frame in percent on x-axis (percent)
+		$x:#{$col * $col-ratio + '%'};
+		//position of frame in percent on x-axis (percent)
+		$y:#{$row * $row-ratio +'%'};
+
+		$step: $i * $_duration / $total-frames ;
+
+		// find step percentage
+		//$at:  round($accuracy * $i * ($animation-pauseat) / $frames) / $accuracy;
+
+		$at: round($accuracy * ( $_start + $step )) / $accuracy ;
+
+		#{$at}% {
+			background-position: $x $y ;
+			@content;
+		}
+	}
+
+	@if $reverse {
+
+		@for $i from $rframes through 0 {
+
+			//current col
+			$col: $i % $spritesheet-cols;
+			//current row
+			$row: floor( $i / $spritesheet-cols);
+
+			//position of frame in percent on x-axis (percent)
+			$x:#{$col * $col-ratio + '%'};
+			//position of frame in percent on x-axis (percent)
+			$y:#{$row * $row-ratio +'%'};
+
+			$ii: $frames + ( $rframes - $i ) + 1;
+
+			$step: $ii * $_duration / $total-frames ;
+
+			// find step percentage
+			//$at:  round($accuracy * $i * ($animation-pauseat) / $frames) / $accuracy;
+
+			$at:  round($accuracy * ( $_start + $step )) / $accuracy ;
+
+			#{$at+"%"} {
+				background-position: $x $y ;
+				@content;
+			}
+		}
+
+	}
+
+}
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////
+////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  
+//  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  //  
+////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////  ////
+//////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////  //////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+//////////////////////
+// turn map into selector props
+//////////////////////
+
+
+@mixin add-properties($m){
+	@each $v1, $v2 in $m {
+			#{$v1}:$v2 ;
+		}
+}
+
+
+
+
+// should be in animation.scss timeline
+@mixin keyframe-range($start, $duration, $total:null, $m1:null, $m2:null) {
+
+	// fractional values to start at
+	$begin : $start / if( $total, $total, $duration ) ;
+	// fractional values to end at
+	$end: if( $total, ($start + $duration) / $total, 1 );
+
+	// convert to % remove decimals - can control how many by changing decimal param ex. 1, 2...
+	$begin: control-round( percentage($begin), $decimals:0) ;
+	$end: control-round( percentage($end), $decimals:0) ;
+
+	// convert fractional value to a percentage
+	#{$begin}{
+		@if $m1 {
+			@include add-properties($m1);
+		}@else{
+			@content ;
+		} 
+	}
+	// if duration == 0 only print out 1 % value
+	@if $duration != 0{
+		// convert fractional value to a percentage	
+		#{$end}{
+			@if $m2 {
+				@include add-properties($m2);
+			}@else{
+				@content ;
+			} 
+		}
+	}
+}
+
+
+
+
+
+//////////////////////
+// specifically for use with animation sequences
+// sets timing functions to be optimized for emails
+//////////////////////
+
+@mixin keyframe-range-complete($start, $duration, $total:null, $m1:null, $m2:null) {
+
+	// fractional values to start at
+	$begin : $start / if( $total, $total, $duration ) ;
+	// fractional values to end at
+	$end: if( $total, ($start + $duration) / $total, 1 );
+
+	// convert to % remove decimals - can control how many by changing decimal param ex. 1, 2...
+	$begin: control-round( percentage($begin), $decimals:0) ;
+	$end: control-round( percentage($end), $decimals:0) ;
+
+
+	// should be in conditional 
+	@if $start != 0s {
+		0%{
+			@if $m1 {
+				@include add-properties($m1);
+			}
+			@else{
+				@content ;
+			} 
+			-webkit-animation-timing-function:steps(1)
+		} ;
+	} ;
+
+	// convert fractional value to a percentage
+	#{$begin}{
+		@if $m1 {
+			@include add-properties($m1);
+		}
+		@else{
+			@content ;
+		}
+		-webkit-animation-timing-function:linear ; 
+	}
+
+	// convert fractional value to a percentage	
+	#{$end}{
+		@if $m2 {
+			@include add-properties($m2);
+		}
+		@else{
+			@content ;
+		}
+		-webkit-animation-timing-function:steps(1) ; 
+	}
+
+	// should be in conditional
+	@if $start + $duration < $total {
+
+		100%{ 
+			@if $m2 {
+				@include add-properties($m2);
+			}
+			@else{
+				@content ;
+			} 
+		} ;
+	} ;		
+}
+
+
+
+
+
+@mixin set-keyframes($name, $type, $start, $duration, $total:null, $m1:null, $m2:null) {
+	@-webkit-keyframes #{$name}-#{$type} {
+		@include keyframe-range-complete($start, $duration, $total, $m1, $m2) ;
+	}
+};
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+// usage
+
+// @-webkit-keyframes #{$name}-#{$type} {
+// 	@include keyframe-range-complete($start, $duration, $total:null, $m1:null, $m2:null) ;
+// }
+
+
+
+@mixin keyframes-range-extended($name, $type, $start, $duration, $total:null, $m1:null, $m2:null) {
+
+	// if you don't set 3rd param $total, $duration will be passed as $total
+	$_total: if( $total, $total, $duration ) ;
+	$end: if( $total, ($start + $duration) / $total, 1 ) ;
+
+	// working out keyframe percentages
+	$a: round(($start / $_total) * 100) / 100 ;
+	$b: round(($end) * 100) / 100 ;
+	
+	@debug $start, $duration, $total;
+
+	@-webkit-keyframes #{$name}-#{$type} {
+
+		// should be in conditional 
+		@if $start != 0s {
+			0%{
+				@if $m1 {
+					@include add-properties($m1);
+				}@else{
+					@content ;
+				} 
+				-webkit-animation-timing-function:steps(1)
+			} ;
+		} ;
+
+		
+		// 
+		#{percentage($a)}{
+			@if $m1 {
+				@include add-properties($m1);
+			}@else{
+				@content ;
+			} 
+			-webkit-animation-timing-function:linear ;
+		} ;
+
+		
+		//
+		#{percentage($b)}{
+			@if $m2 {
+				@include add-properties($m2);
+			}@else{
+				@content ;
+			} 
+			-webkit-animation-timing-function:steps(1) ;
+		} ;
+
+
+		// should be in conditional
+		@if $start + $duration != $total {
+
+			100%{ 
+				@if $m2 {
+					@include add-properties($m2);
+				}@else{
+					@content ;
+				} 
+			} ;
+		} ;
+
+	}	
+
+
+}
+
+
+
+
+
+// pass a map of values apply them to keyframes
+
+@mixin keyframe-range-fromValues($start, $duration, $total:null, $keyframe-props:null, $reverse:false) {
+
+	// fractional values to start at
+	$begin : $start / if( $total, $total, $duration ) ;
+
+	// fractional values of duration
+	$_duration: $duration / $total ;
+	
+	// 
+	$keys-list: map-keys($keyframe-props) ;
+
+	// 
+	$step: $_duration / length($keys-list) ;
+
+
+
+	@if $reverse == false {
+		@for $i from 1 through length($keys-list) {
+
+			$val: $begin + (($i - 1) * $step);
+			// convert to % remove decimals - can control how many by changing decimal param ex. 1, 2...		
+			$val: control-round( percentage($val), $decimals:0) ;
+
+			// convert fractional value to a percentage
+			#{$val}{
+				#{nth($keys-list, $i)} : map-get($keyframe-props, nth($keys-list, $i));
+			}
+		}
+	}
+	@if $reverse {
+		@for $i from length($keys-list) through 1 {
+
+			$val: $begin + (( length($keys-list) - $i) * $step);
+			// convert to % remove decimals - can control how many by changing decimal param ex. 1, 2...		
+			$val: control-round( percentage($val), $decimals:0) ;
+
+			// convert fractional value to a percentage
+			#{$val}{
+				#{nth($keys-list, $i)} : map-get($keyframe-props, nth($keys-list, $i));
+			}
+		}
+	}	
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// look up for keframe mixin
+//////////////////////////////////////////////////
+
+
+@mixin animation-look-up-extended($transition) {
+
+	//
+
+	$type: nth($transition, 1) ;
+	$name: nth($transition, 2) ;
+	$start: nth($transition, 3) ;
+	$duration: nth($transition, 4) ;
+
+	// fades - incorporate percentages
+
+	@if $type == 'in' or $type == 'i' {
+		@include keyframes-range-extended($name, 'in', $start, $duration, $total, 
+			(opacity:0), 
+			(opacity:1)
+			) ;
+	} 
+
+	@else if $type == 'out' or $type == 'o' {
+		@include keyframes-range-extended($name, 'out', $start, $duration, $total, 
+			(opacity:1), 
+			(opacity:0)
+			) ;
+	}  
+
+	// zoom - incorporate value
+
+	@else if $type == 'up' or $type == 'u' {
+		@include keyframes-range-extended($name, 'up', $start, $duration, $total, 
+			(-webkit-transform:scale(1)), 
+			(-webkit-transform:scale(1.1))
+			) ;		
+	} 
+
+	@else if $type == 'down' or $type == 'd' {
+		@include keyframes-range-extended($name, 'down', $start, $duration, $total, 
+			(-webkit-transform:scale(1.1)), 
+			(-webkit-transform:scale(1))
+			) ;		
+	} 	
+
+	// pan left - incorporate value length
+
+	@else if $type == 'pan' or $type == 'p' {
+		@include keyframes-range-extended($name, 'down', $start, $duration, $total, 
+			(background-position-x:20%), 
+			(background-position-x:100%)
+			) ;	
+	}	
+
+	//
+
+	@else {
+
+		// default
+	}
+
+}
+
+
+// will return the time the final frame animation ends
+
+@mixin recurse($frame-list) {
+
+	$action:true;
+
+	@for $i from 1 through length($frame-list) {
+
+		$el:nth($frame-list, $i) ;
+
+		@if type-of($el) == list {
+			@include recurse($el) ;
+			$action:false;
+		}
+	}
+
+	@if $action {
+		@include animation-look-up($frame-list) ;
+	}
+}
+
+
+$FRAME-ALL:
+	(
+		( 'in', 'el-1', 0s, 1s ), 
+		( 'out', 'el-2', 0s, 1s ), 
+		( 'pan', 'el-3', 0s, 1s )
+	), 
+	(
+		( 'up', 'el-1', 0s, 1s ), 
+		( 'd', 'el-2', 0s, 1s ), 
+		( 'pan', 'el-3', 0s, 1s )
+	), 
+	(
+		( 'in', 'el-1', 0s, 1s ), 
+		( 'out', 'el-2', 0s, 1s ), 
+		( 'pan', 'el-3', 0s, 1s )
+	)
+	;

@@ -1,0 +1,191 @@
+
+// https://css-tricks.com/logic-in-media-queries/
+
+@mixin ipad-no-retina(){
+	@media only screen
+	and (min-device-width : 768px)
+	and (max-device-width : 1024px){
+		@content;
+	}
+}
+
+//iPad in landscape
+//iPad in portrait
+@mixin ipad($orientation){
+	@media only screen
+	and (min-device-width : 768px)
+	and (max-device-width : 1024px)
+	and (orientation : #{$orientation}) {
+		@content;
+	}
+}
+
+//iPad mini in landscape
+//iPad mini in portrait
+@mixin ipad-mini($orientation){
+	@media only screen
+	and (min-device-width : 768px)
+	and (max-device-width : 1024px)
+	and (orientation : #{$orientation})
+	and (-webkit-min-device-pixel-ratio: 1)  {
+		@content;
+	}
+}
+
+@mixin size ($w, $h){
+	@media only screen
+		and (min-device-width : $w)
+		and (max-device-width : $h) {
+			@content;
+		}
+}
+
+@mixin iphones($orientation...){
+
+	$iphone6-p:(414px,736px);
+	$iphone6:(375px,667px);
+	$iphone5:(320px,568px);
+	$iphone2-4:(320px,480px);
+	$use:$iphone6-p;
+
+	@media only screen
+	and (min-device-width : nth($use, 1))
+	and (max-device-width : nth($use, 2))
+	and (orientation : #{nth($orientation, 1)}){
+		@content
+	}
+
+}
+
+
+///////////// **** IN PROGRESS ******
+
+@include iphones('landscape'){
+	.a{
+		width: 100px;
+		}};
+
+
+
+@include ipad('landscape'){
+
+}
+
+@include ipad('portrait'){
+
+}
+
+@include iphones('landscape'){
+
+}
+
+@include iphones('portrait'){
+
+}
+
+
+
+
+//iPhone 6 Plus in landscape
+@media only screen
+and (min-device-width : 414px)
+and (max-device-width : 736px)
+and (orientation : landscape) {
+
+}
+
+//iPhone 6 Plus in portrait
+@media only screen
+and (min-device-width : 414px)
+and (max-device-width : 736px)
+and (orientation : portrait) {
+
+}
+
+
+
+
+//iPhone 6 in landscape
+@media only screen
+and (min-device-width : 375px)
+and (max-device-width : 667px)
+and (orientation : landscape) {
+
+}
+
+//iPhone 6 in portrait
+@media only screen
+and (min-device-width : 375px)
+and (max-device-width : 667px)
+and (orientation : portrait) {
+}
+
+// iPhone 5 & 5S in landscape
+@media only screen
+and (min-device-width : 320px)
+and (max-device-width : 568px)
+and (orientation : landscape) {
+
+}
+
+//iPhone 5 & 5S in portrait
+@media only screen
+and (min-device-width : 320px)
+and (max-device-width : 568px)
+and (orientation : portrait) {
+
+}
+
+
+//iPhone 2G-4S in landscape
+@media only screen
+and (min-device-width : 320px)
+and (max-device-width : 480px)
+and (orientation : landscape) {
+
+}
+
+//iPhone 2G-4S in portrait
+@media only screen
+and (min-device-width : 320px)
+and (max-device-width : 480px)
+and (orientation : portrait) {
+
+}
+
+// http://www.leemunroe.com/designing-for-high-resolution-retina-displays/
+// https://css-tricks.com/snippets/css/retina-display-media-query/
+
+@media only screen
+and (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* High-res styles go here */
+}
+
+
+
+
+////////////////////////////////////////////////////////////
+// Samsung
+////////////////////////////////////////////////////////////
+
+//How to target Samsung Galaxy S4
+@media screen and (device-width: 360px) and (device-height: 640px) and (-webkit-device-pixel-ratio: 3){}
+//How to target Samsung Galaxy S3 I9300
+@media screen and (device-width: 720px) and (device-height: 1280px)  and (-webkit-min-device-pixel-ratio: 2){}
+//@media screen and (device-width: 360px) and (device-height: 640px) and (-webkit-device-pixel-ratio: 2){}
+
+//How to target Samsung Galaxy S2 I9100
+@media screen and (device-width: 320px) and (device-height: 533px) and (-webkit-device-pixel-ratio: 1.5){}
+
+////////////////////////////////////////////////////////////
+// Samsung
+////////////////////////////////////////////////////////////
+
+// portrait on Android devices with keyboard open
+// http://blog.abouthalf.com/development/orientation-media-query-challenges-in-android-browsers/
+//For landscape media:
+
+@media screen and (min-aspect-ratio: 13/9) { /* landscape styles here */}
+//And for portrait media:
+
+@media screen and (max-aspect-ratio: 13/9) { /* portrait styles here */}

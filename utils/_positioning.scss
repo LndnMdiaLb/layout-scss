@@ -1,0 +1,72 @@
+.ext-abs-top-left{
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+@mixin translateX($val) {
+
+ -webkit-transform: translateX($val);
+  -moz-transform: translateX($val);
+  -ms-transform: translateX($val);
+  transform: translateX($val);
+
+}
+
+@mixin translateY($val) {
+
+ -webkit-transform: translateY($val);
+  -moz-transform: translateY($val);
+  -ms-transform: translateY($val);
+  transform: translateY($val);
+
+}
+
+@mixin position( $percentage ){
+	position: absolute;
+	top:$percentage;
+	@include transform (translate(0%, -50%));
+}
+
+@mixin center( $offsetx:false, $offsety:false ) {
+	position:absolute;
+	@include transform(translate(-50%, -50%));
+
+	@if $offsetx {
+		left: calc(50% + #{$offsetx});
+	}@else{
+		left: 50%;
+	}
+	@if $offsety {
+		top: calc(50% + #{$offsety});
+	}@else{
+		top: 50%;
+	}
+}
+
+// Cross browser border radius.
+
+@mixin border-radius($radius) {
+  -webkit-border-radius: $radius;
+     -moz-border-radius: $radius;
+      -ms-border-radius: $radius;
+          border-radius: $radius;
+}
+
+// functions
+
+
+@mixin somoothfont(){
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: normal;
+    font-style: normal;
+    font-variant:normal;
+}
+
+@mixin shad($col , $distance){
+   text-shadow: 1px 1px $distance $col;
+}
+
+
+
