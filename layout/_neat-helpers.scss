@@ -1,0 +1,39 @@
+
+////////////////////////////////////////////////////////
+// NEAT HELPER FUNCTIONS
+////////////////////////////////////////////////////////
+
+// Add a unit if not included
+
+@function add-unit($num, $unit:'px'){
+  @return if(unitless($num),$num+$unit,$num) ;
+};
+
+// Helper function for creating min / max media query for grid-media()
+
+@function neat-media($sizes...){
+
+  // if only
+  $size:nth($sizes, 1) ;
+  // if size has no px unit add
+  $val:" and (max-width:#{add-unit($size)})" ;
+
+  @if length($sizes) >= 2 {
+    $val:" and (min-width:#{add-unit(nth($sizes, 1))})" ;
+    $val:$val+" and (max-width:#{add-unit(nth($sizes, 2))})" ;
+  }
+
+  @return (
+    media:"only screen#{$val}"
+  );
+
+};
+
+////////////////////////////////////////////////////////
+//
+// SEPARATE MEDIA QUERY FROM GRID METHOD
+//
+// make grid lists reusable by injecting media query propery
+// ex:  @debug map-merge($neat-grid, neat-media(7, 80));
+//
+////////////////////////////////////////////////////////
