@@ -1,0 +1,16 @@
+
+
+
+////////////////////////////////////////////////
+// Responsive  With Neat Grid
+////////////////////////////////////////////////
+
+// Mobile First (?)
+// as scss mixins are added they apply to the smallest dimensions
+// as you include mixins you are targetting larger dimensions
+// see neat helpers for media query patterns
+
+
+// USEFUL METHOD WITHIN NEAT FRAMEWORK
+//@debug #{_neat-column-width((gutter:20px,columns:6), 3)};
+// to pass to calc as width value
