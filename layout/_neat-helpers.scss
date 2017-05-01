@@ -3,13 +3,29 @@
 // NEAT HELPER FUNCTIONS
 ////////////////////////////////////////////////////////
 
+//////////////
 // Add a unit if not included
+//////////////
 
 @function add-unit($num, $unit:'px'){
   @return if(unitless($num),$num+$unit,$num) ;
 };
 
+
+//////////////
+// Usecase
+// pass children columns list of parent instead of whole grid
+//////////////
+
+@function neat-cols($val){
+  @return (
+    columns:$val
+  );
+}
+
+//////////////
 // Helper function for creating min / max media query for grid-media()
+//////////////
 
 @function neat-media($sizes...){
 
@@ -37,3 +53,18 @@
 // ex:  @debug map-merge($neat-grid, neat-media(7, 80));
 //
 ////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////
+//
+// BULK APPLY new grid to content instead of passing to each
+//
+////////////////////////////////////////////////////////
+
+
+@mixin apply-grid($grid) {
+    $_default-neat-grid: $neat-grid;
+    $neat-grid: map-merge($neat-grid, $grid) !global;
+    @content;
+    $neat-grid: $_default-neat-grid !global;
+}
