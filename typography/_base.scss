@@ -66,33 +66,33 @@ body {
 	@include sgl-body("pxrem");
 }
 
-.grid-1 {
 
-  h1 {
-  	@include sgl-heading(3, "pxrem");
-  }
 
-  h2 {
-  	@include sgl-heading(2, "pxrem");
-  }
-
-  h3 {
-  	@include sgl-heading(1, "pxrem");
-  }
-
-  h4 {
-  	@include sgl-heading(0);
-  }
-
-  p,
-  ul,
-  ol,
-  pre,
-  table,
-  blockquote {
-  	@include sgl-margins();
-  }
+h1 {
+	@include sgl-heading(3, "pxrem");
 }
+
+h2 {
+	@include sgl-heading(2, "pxrem");
+}
+
+h3 {
+	@include sgl-heading(1, "pxrem");
+}
+
+h4 {
+	@include sgl-heading(0);
+}
+
+p,
+ul,
+ol,
+pre,
+table,
+blockquote {
+	@include sgl-margins();
+}
+
 
 
 
